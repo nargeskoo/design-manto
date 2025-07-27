@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <title>وب‌اپ مانتو فروشی با عکس</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      direction: rtl;
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .section {
+      background-color: white;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 400px;
+      margin-bottom: 30px;
+    }
+    .section h2 {
+      margin-top: 0;
+      color: #333;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input[type="text"], input[type="number"], input[type="file"], select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #004a99;
+    }
+    .manto-list {
+      margin-top: 20px;
+    }
+    .manto-item {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .manto-item:hover {
+      background-color: #f0f0f0;
+    }
+    .details {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #555;
+    }
+    #manageSection div {
+      margin-bottom: 10px;
+    }
+    #manageSection button {
+      margin-right: 10px;
+      padding: 2px 10px;
+    }
+    img.preview {
+      max-width: 100%;
+      max-height: 150px;
+      margin-top: 10px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- افزودن مانتو -->
+    <div class="section">
+      <h2>افزودن مانتو</h2>
+      <form id="addForm">
+        <label for="photo">عکس مانتو:</label>
+        <input type="file" id="photo" accept="image/*">
+
+        <label for="name">نام مانتو:</label>
+        <input type="text" id="name">
+
+        <label for="code">کد مانتو:</label>
+        <input type="text" id="code">
+
+        <label for="price">قیمت مانتو (تومان):</label>
+        <input type="number" id="price">
+
+        <label for="color">رنگ مانتو:</label>
+        <input type="text" id="color">
+
+        <label for="size36">موجودی سایز ۳۶:</label>
+        <input type="number" id="size36">
+
+        <label for="size38">موجودی سایز ۳۸:</label>
+        <input type="number" id="size38">
+
+        <label for="size40">موجودی سایز ۴۰:</label>
+        <input type="number" id="size40">
+
+        <label for="size42">موجودی سایز ۴۲:</label>
+        <input type="number" id="size42">
+
+        <button type="submit">ثبت مانتو</button>
+      </form>
+    </div>
+
+    <!-- جستجو -->
+    <div class="section">
+      <h2>جستجوی مانتو</h2>
+      <label for="sizeFilter">فیلتر بر اساس سایز:</label>
+      <select id="sizeFilter">
+        <option value="">-- انتخاب سایز --</option>
+        <option value="36">۳۶</option>
+        <option value="38">۳۸</option>
+        <option value="40">۴۰</option>
+        <option value="42">۴۲</option>
+      </select>
+
+      <div class="manto-list" id="mantoList"></div>
+    </div>
+  </div>
+
+  <!-- مدیریت مانتوها -->
+  <div class="section" style="max-width: 500px; margin: 0 auto;">
+    <h2>مدیریت مانتوها</h2>
+    <label for="manageSelect">انتخاب مانتو:</label>
+    <select id="manageSelect">
+      <option value="">-- انتخاب مانتو --</option>
+    </select>
+
+    <div id="manageSection" style="margin-top: 20px; display: none;">
+      <img id="managePhoto" class="preview" src="" alt="نمایش عکس">
+      <h3>موجودی سایزها:</h3>
+      <div id="sizeControls"></div>
+      <button id="saveChangesBtn" style="background-color: green; color: white; margin-top: 20px;">ثبت تغییرات</button>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("addForm");
+    const mantoList = document.getElementById("mantoList");
+    const sizeFilter = document.getElementById("sizeFilter");
+    const manageSelect = document.getElementById("manageSelect");
+    const manageSection = document.getElementById("manageSection");
+    const sizeControls = document.getElementById("sizeControls");
+    const managePhoto = document.getElementById("managePhoto");
+    const saveChangesBtn = document.getElementById("saveChangesBtn");
+
+    let mantos = [];
+
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+      const reader = new FileReader();
+      const file = document.getElementById("photo").files[0];
+      reader.onload = function() {
+        const manto = {
+          name: document.getElementById("name").value,
+          code: document.getElementById("code").value,
+          price: document.getElementById("price").value,
+          color: document.getElementById("color").value,
+          photo: reader.result,
+          sizes: {
+            "36": parseInt(document.getElementById("size36").value) || 0,
+            "38": parseInt(document.getElementById("size38").value) || 0,
+            "40": parseInt(document.getElementById("size40").value) || 0,
+            "42": parseInt(document.getElementById("size42").value) || 0
+          }
+        };
+        mantos.push(manto);
+        form.reset();
+        showMantos();
+        updateManageDropdown();
+      };
+      if (file) reader.readAsDataURL(file);
+    });
+
+    sizeFilter.addEventListener("change", showMantos);
+
+    function showMantos() {
+      mantoList.innerHTML = "";
+      const filter = sizeFilter.value;
+      mantos.forEach((manto, index) => {
+        if (filter === "" || manto.sizes[filter] > 0) {
+          const div = document.createElement("div");
+          div.className = "manto-item";
+          div.innerHTML = `
+            <strong>${manto.name}</strong> (کد: ${manto.code}) - ${manto.color} - ${manto.price} تومان
+            <br><img src="${manto.photo}" class="preview">
+            <div class="details" style="display: none;">
+              سایز ۳۶: ${manto.sizes["36"]}<br>
+              سایز ۳۸: ${manto.sizes["38"]}<br>
+              سایز ۴۰: ${manto.sizes["40"]}<br>
+              سایز ۴۲: ${manto.sizes["42"]}
+            </div>
+          `;
+          div.addEventListener("click", () => {
+            const details = div.querySelector(".details");
+            details.style.display = details.style.display === "none" ? "block" : "none";
+          });
+          mantoList.appendChild(div);
+        }
+      });
+    }
+
+    function updateManageDropdown() {
+      manageSelect.innerHTML = '<option value="">-- انتخاب مانتو --</option>';
+      mantos.forEach((manto, i) => {
+        const option = document.createElement("option");
+        option.value = i;
+        option.textContent = `${manto.name} (کد: ${manto.code})`;
+        manageSelect.appendChild(option);
+      });
+    }
+
+    manageSelect.addEventListener("change", () => {
+      const selectedIndex = manageSelect.value;
+      if (selectedIndex === "") {
+        manageSection.style.display = "none";
+        return;
+      }
+      const manto = mantos[selectedIndex];
+      sizeControls.innerHTML = "";
+      managePhoto.src = manto.photo;
+      for (const size in manto.sizes) {
+        const div = document.createElement("div");
+        div.innerHTML = `
+          سایز ${size}: 
+          <span id="count-${size}">${manto.sizes[size]}</span>
+          <button onclick="decreaseSize(${selectedIndex}, '${size}')"> - </button>
+        `;
+        sizeControls.appendChild(div);
+      }
+      manageSection.style.display = "block";
+    });
+
+    window.decreaseSize = function(index, size) {
+      if (mantos[index].sizes[size] > 0) {
+        mantos[index].sizes[size]--;
+        document.getElementById(`count-${size}`).textContent = mantos[index].sizes[size];
+      }
+    };
+
+    saveChangesBtn.addEventListener("click", () => {
+      alert("تغییرات ذخیره شد ✅");
+      showMantos();
+    });
+  </script>
+</body>
+</html>
