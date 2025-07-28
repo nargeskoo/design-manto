@@ -10,20 +10,15 @@
       background-color: #f5f7fa;
       margin: 0;
       padding: 20px;
-    }
-    .container {
-      display: flex;
-      gap: 40px;
-      flex-wrap: wrap;
-      justify-content: center;
+      font-size: 18px;
     }
     .section {
       background-color: white;
       padding: 20px;
       border-radius: 16px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      width: 400px;
-      margin-bottom: 30px;
+      max-width: 600px;
+      margin: 0 auto 30px;
     }
     .section h2 {
       margin-top: 0;
@@ -36,11 +31,12 @@
     }
     input[type="text"], input[type="number"], input[type="file"], select {
       width: 100%;
-      padding: 8px;
+      padding: 10px;
       margin-top: 5px;
       border: 1px solid #ccc;
       border-radius: 6px;
       box-sizing: border-box;
+      font-size: 18px;
     }
     button {
       margin-top: 20px;
@@ -50,7 +46,7 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 18px;
     }
     button:hover {
       background-color: #004a99;
@@ -61,7 +57,7 @@
     .manto-item {
       border: 1px solid #ddd;
       padding: 10px;
-      margin-bottom: 10px;
+      margin-bottom: 20px;
       border-radius: 8px;
       cursor: pointer;
     }
@@ -70,7 +66,7 @@
     }
     .details {
       margin-top: 10px;
-      font-size: 14px;
+      font-size: 16px;
       color: #555;
     }
     #manageSection div {
@@ -81,80 +77,112 @@
       padding: 2px 10px;
     }
     img.preview {
-      max-width: 100%;
-      max-height: 150px;
+      width: 100%;
+      height: auto;
+      max-height: 400px;
+      object-fit: contain;
       margin-top: 10px;
       border-radius: 8px;
+    }
+    .size-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .size-grid label {
+      width: 80px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- افزودن مانتو -->
-    <div class="section">
-      <h2>افزودن مانتو</h2>
-      <form id="addForm">
-        <label for="photo">عکس مانتو:</label>
-        <input type="file" id="photo" accept="image/*">
 
-        <label for="name">نام مانتو:</label>
-        <input type="text" id="name">
-
-        <label for="code">کد مانتو:</label>
-        <input type="text" id="code">
-
-        <label for="price">قیمت مانتو (تومان):</label>
-        <input type="number" id="price">
-
-        <label for="color">رنگ مانتو:</label>
-        <input type="text" id="color">
-
-        <label for="size36">موجودی سایز ۳۶:</label>
-        <input type="number" id="size36">
-
-        <label for="size38">موجودی سایز ۳۸:</label>
-        <input type="number" id="size38">
-
-        <label for="size40">موجودی سایز ۴۰:</label>
-        <input type="number" id="size40">
-
-        <label for="size42">موجودی سایز ۴۲:</label>
-        <input type="number" id="size42">
-
-        <button type="submit">ثبت مانتو</button>
-      </form>
-    </div>
-
-    <!-- جستجو -->
-    <div class="section">
-      <h2>جستجوی مانتو</h2>
-      <label for="sizeFilter">فیلتر بر اساس سایز:</label>
-      <select id="sizeFilter">
-        <option value="">-- انتخاب سایز --</option>
-        <option value="36">۳۶</option>
-        <option value="38">۳۸</option>
-        <option value="40">۴۰</option>
-        <option value="42">۴۲</option>
-      </select>
-
-      <div class="manto-list" id="mantoList"></div>
-    </div>
+  <!-- جستجو -->
+  <div class="section">
+    <h2>جستجوی مانتو</h2>
+    <label for="sizeFilter">فیلتر بر اساس سایز:</label>
+    <select id="sizeFilter">
+      <option value="">-- انتخاب سایز --</option>
+      <option value="36">۳۶</option>
+      <option value="37">۳۷</option>
+      <option value="40">۴۰</option>
+      <option value="42">۴۲</option>
+      <option value="44">۴۴</option>
+      <option value="46">۴۶</option>
+      <option value="48">۴۸</option>
+      <option value="50">۵۰</option>
+      <option value="52">۵۲</option>
+      <option value="54">۵۴</option>
+      <option value="2">۲</option>
+      <option value="4">۴</option>
+      <option value="6">۶</option>
+      <option value="8">۸</option>
+    </select>
+    <div class="manto-list" id="mantoList"></div>
   </div>
 
   <!-- مدیریت مانتوها -->
-  <div class="section" style="max-width: 500px; margin: 0 auto;">
+  <div class="section">
     <h2>مدیریت مانتوها</h2>
     <label for="manageSelect">انتخاب مانتو:</label>
     <select id="manageSelect">
       <option value="">-- انتخاب مانتو --</option>
     </select>
-
     <div id="manageSection" style="margin-top: 20px; display: none;">
       <img id="managePhoto" class="preview" src="" alt="نمایش عکس">
       <h3>موجودی سایزها:</h3>
       <div id="sizeControls"></div>
       <button id="saveChangesBtn" style="background-color: green; color: white; margin-top: 20px;">ثبت تغییرات</button>
     </div>
+  </div>
+
+  <!-- افزودن مانتو -->
+  <div class="section">
+    <h2>افزودن مانتو</h2>
+    <form id="addForm">
+      <label for="photo">عکس مانتو:</label>
+      <input type="file" id="photo" accept="image/*">
+
+      <label for="name">نام مانتو:</label>
+      <input type="text" id="name">
+
+      <label for="code">کد مانتو:</label>
+      <input type="text" id="code">
+
+      <label for="price">قیمت مانتو (تومان):</label>
+      <input type="number" id="price">
+
+      <label for="color">رنگ مانتو:</label>
+      <select id="color">
+        <option>مشکی</option>
+        <option>سرمه‌ای</option>
+        <option>طوسی</option>
+        <option>ذغالی</option>
+        <option>سبز</option>
+        <option>کرم</option>
+        <option>آبی</option>
+        <option>سایر</option>
+      </select>
+
+      <div class="size-grid">
+        <label>سایز ۳۶:<input type="number" id="size36"></label>
+        <label>سایز ۳۷:<input type="number" id="size37"></label>
+        <label>سایز ۴۰:<input type="number" id="size40"></label>
+        <label>سایز ۴۲:<input type="number" id="size42"></label>
+        <label>سایز ۴۴:<input type="number" id="size44"></label>
+        <label>سایز ۴۶:<input type="number" id="size46"></label>
+        <label>سایز ۴۸:<input type="number" id="size48"></label>
+        <label>سایز ۵۰:<input type="number" id="size50"></label>
+        <label>سایز ۵۲:<input type="number" id="size52"></label>
+        <label>سایز ۵۴:<input type="number" id="size54"></label>
+        <label>سایز ۲:<input type="number" id="size2"></label>
+        <label>سایز ۴:<input type="number" id="size4"></label>
+        <label>سایز ۶:<input type="number" id="size6"></label>
+        <label>سایز ۸:<input type="number" id="size8"></label>
+      </div>
+
+      <button type="submit">ثبت مانتو</button>
+    </form>
   </div>
 
   <script>
@@ -166,7 +194,6 @@
     const sizeControls = document.getElementById("sizeControls");
     const managePhoto = document.getElementById("managePhoto");
     const saveChangesBtn = document.getElementById("saveChangesBtn");
-
     let mantos = [];
 
     form.addEventListener("submit", function(e) {
@@ -174,18 +201,17 @@
       const reader = new FileReader();
       const file = document.getElementById("photo").files[0];
       reader.onload = function() {
+        const sizes = {};
+        ["36","37","40","42","44","46","48","50","52","54","2","4","6","8"].forEach(size => {
+          sizes[size] = parseInt(document.getElementById("size"+size).value) || 0;
+        });
         const manto = {
           name: document.getElementById("name").value,
           code: document.getElementById("code").value,
           price: document.getElementById("price").value,
           color: document.getElementById("color").value,
           photo: reader.result,
-          sizes: {
-            "36": parseInt(document.getElementById("size36").value) || 0,
-            "38": parseInt(document.getElementById("size38").value) || 0,
-            "40": parseInt(document.getElementById("size40").value) || 0,
-            "42": parseInt(document.getElementById("size42").value) || 0
-          }
+          sizes
         };
         mantos.push(manto);
         form.reset();
@@ -208,10 +234,7 @@
             <strong>${manto.name}</strong> (کد: ${manto.code}) - ${manto.color} - ${manto.price} تومان
             <br><img src="${manto.photo}" class="preview">
             <div class="details" style="display: none;">
-              سایز ۳۶: ${manto.sizes["36"]}<br>
-              سایز ۳۸: ${manto.sizes["38"]}<br>
-              سایز ۴۰: ${manto.sizes["40"]}<br>
-              سایز ۴۲: ${manto.sizes["42"]}
+              ${Object.entries(manto.sizes).map(([s,v]) => `سایز ${s}: ${v}`).join('<br>')}
             </div>
           `;
           div.addEventListener("click", () => {
@@ -244,11 +267,7 @@
       managePhoto.src = manto.photo;
       for (const size in manto.sizes) {
         const div = document.createElement("div");
-        div.innerHTML = `
-          سایز ${size}: 
-          <span id="count-${size}">${manto.sizes[size]}</span>
-          <button onclick="decreaseSize(${selectedIndex}, '${size}')"> - </button>
-        `;
+        div.innerHTML = `سایز ${size}: <span id="count-${size}">${manto.sizes[size]}</span> <button onclick="decreaseSize(${selectedIndex}, '${size}')"> - </button>`;
         sizeControls.appendChild(div);
       }
       manageSection.style.display = "block";
