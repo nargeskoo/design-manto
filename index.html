@@ -79,10 +79,11 @@
     img.preview {
       width: 100%;
       height: auto;
-      max-height: 400px;
+      max-height: none;
       object-fit: contain;
       margin-top: 10px;
       border-radius: 8px;
+      aspect-ratio: 2/3;
     }
     .size-grid {
       display: flex;
@@ -226,8 +227,9 @@
     function showMantos() {
       mantoList.innerHTML = "";
       const filter = sizeFilter.value;
+      if (!filter) return;
       mantos.forEach((manto, index) => {
-        if (filter === "" || manto.sizes[filter] > 0) {
+        if (manto.sizes[filter] > 0) {
           const div = document.createElement("div");
           div.className = "manto-item";
           div.innerHTML = `
