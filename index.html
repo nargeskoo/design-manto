@@ -79,7 +79,6 @@
     img.preview {
       width: 100%;
       height: auto;
-      max-height: none;
       object-fit: contain;
       margin-top: 10px;
       border-radius: 8px;
@@ -94,7 +93,6 @@
     .size-grid label {
       width: 80px;
     }
-    /* استایل چک‌باکس‌های سایز */
     #sizeCheckboxes {
       display: flex;
       flex-wrap: wrap;
@@ -106,7 +104,6 @@
       user-select: none;
       font-weight: normal;
     }
-    /* منوی رنگ */
     #colorFilter {
       margin-top: 15px;
       width: 100%;
@@ -116,7 +113,6 @@
       border: 1px solid #ccc;
       box-sizing: border-box;
     }
-    /* عنوان موجودی سایز در فرم افزودن */
     #addForm .size-title {
       font-weight: bold;
       font-size: 20px;
@@ -210,9 +206,7 @@
         <option>سایر</option>
       </select>
 
-      <!-- عنوان موجودی سایز اضافه شده -->
       <div class="size-title">موجودی هر سایز:</div>
-
       <div class="size-grid">
         <label>سایز ۳۶:<input type="number" id="size36" min="0" /></label>
         <label>سایز ۳۷:<input type="number" id="size37" min="0" /></label>
@@ -246,14 +240,10 @@
     const saveChangesBtn = document.getElementById("saveChangesBtn");
     let mantos = [];
 
-    // افزودن مانتو جدید
     form.addEventListener("submit", function(e) {
       e.preventDefault();
       const file = document.getElementById("photo").files[0];
-      if (!file) {
-        alert("لطفاً یک عکس مانتو انتخاب کنید.");
-        return;
-      }
+      if (!file) return alert("لطفاً یک عکس مانتو انتخاب کنید.");
       const reader = new FileReader();
       reader.onload = function() {
         const sizes = {};
@@ -283,7 +273,6 @@
       reader.readAsDataURL(file);
     });
 
-    // نمایش مانتوها با فیلتر سایز و رنگ
     function showMantos() {
       const selectedSizes = Array.from(sizeCheckboxes.querySelectorAll("input[type=checkbox]:checked")).map(cb => cb.value);
       const selectedColor = colorFilter.value.trim();
@@ -293,21 +282,21 @@
         return;
       }
 
-      let foundAny = false;
       mantoList.innerHTML = "";
+      let foundAny = false;
       mantos.forEach((manto, idx) => {
         if ((selectedColor === "" || manto.color === selectedColor) &&
-          selectedSizes.some(size => manto.sizes[size] && manto.sizes[size] > 0)) {
+          selectedSizes.some(size => manto.sizes[size] > 0)) {
           foundAny = true;
           const div = document.createElement("div");
           div.className = "manto-item";
           div.innerHTML = `
-            <img src="${manto.photo}" alt="عکس مانتو" style="width:100%; max-height: 300px; object-fit: contain; border-radius: 8px;" />
+            <img src="${manto.photo}" alt="عکس مانتو" class="preview" />
             <h3>${manto.name}</h3>
             <p>کد: ${manto.code}</p>
             <p>قیمت: ${manto.price.toLocaleString()} تومان</p>
             <p>رنگ: ${manto.color}</p>
-            <div class="details" style="display:none; margin-top: 10px;">
+            <div class="details" style="display:none;">
               ${Object.entries(manto.sizes).map(([s,v]) => `سایز ${s}: ${v}`).join('<br>')}
             </div>
           `;
@@ -318,12 +307,9 @@
           mantoList.appendChild(div);
         }
       });
-      if (!foundAny) {
-        mantoList.innerHTML = "<p>هیچ مانتویی با فیلترهای انتخاب شده یافت نشد.</p>";
-      }
+      if (!foundAny) mantoList.innerHTML = "<p>هیچ مانتویی با فیلترهای انتخاب شده یافت نشد.</p>";
     }
 
-    // به‌روزرسانی گزینه‌های انتخاب مانتو در بخش مدیریت
     function updateManageDropdown() {
       manageSelect.innerHTML = '<option value="">-- انتخاب مانتو --</option>';
       mantos.forEach((manto, idx) => {
@@ -334,7 +320,6 @@
       });
     }
 
-    // وقتی مانتو در بخش مدیریت انتخاب شد
     manageSelect.addEventListener("change", function() {
       const idx = this.value;
       if (idx === "") {
@@ -346,7 +331,6 @@
       managePhoto.src = manto.photo;
       sizeControls.innerHTML = "";
 
-      // ساخت کنترل‌های موجودی سایزها همراه با دکمه‌ها
       Object.entries(manto.sizes).forEach(([size, count]) => {
         const div = document.createElement("div");
         div.innerHTML = `
@@ -357,7 +341,6 @@
         sizeControls.appendChild(div);
       });
 
-      // اضافه کردن event به دکمه‌های کاهش
       sizeControls.querySelectorAll(".dec-btn").forEach(btn => {
         btn.onclick = () => {
           const s = btn.getAttribute("data-size");
@@ -368,7 +351,6 @@
         };
       });
 
-      // اضافه کردن event به دکمه‌های افزایش
       sizeControls.querySelectorAll(".inc-btn").forEach(btn => {
         btn.onclick = () => {
           const s = btn.getAttribute("data-size");
@@ -378,16 +360,13 @@
       });
     });
 
-    // ثبت تغییرات موجودی در بخش مدیریت
     saveChangesBtn.addEventListener("click", () => {
       alert("تغییرات ثبت شد.");
       showMantos();
     });
 
-    // هنگام تغییر چک‌باکس‌ها یا رنگ، فیلترها را به روز کن
     sizeCheckboxes.addEventListener("change", showMantos);
     colorFilter.addEventListener("change", showMantos);
-
   </script>
 
 </body>
