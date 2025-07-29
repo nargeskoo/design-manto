@@ -124,10 +124,18 @@
       margin-top: 5px;
     }
     #sizeCheckboxes label {
-      cursor: pointer;
-      user-select: none;
-      font-weight: normal;
-    }
+  cursor: pointer;
+  user-select: none;
+  font-weight: normal;
+  font-size: 20px; /* بزرگ‌تر کردن فونت متن */
+}
+
+#sizeCheckboxes input[type="checkbox"] {
+  width: 24px;    /* بزرگ‌تر کردن چک‌باکس */
+  height: 24px;
+  transform: translateY(4px); /* تراز عمودی با متن */
+}
+
     #colorFilter {
       margin-top: 15px;
       width: 100%;
