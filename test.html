@@ -12,6 +12,30 @@
       padding: 20px;
       font-size: 18px;
     }
+    /* تب‌ها */
+    .tabs {
+      max-width: 600px;
+      margin: 0 auto 30px;
+      display: flex;
+      justify-content: center;
+      gap: 120px;
+      border-bottom: 2px solid #ddd;
+    }
+    .tab {
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 24px;
+      padding-bottom: 8px;
+      color: #666;
+      transition: color 0.3s, border-bottom 0.3s;
+      border-bottom: 3px solid transparent;
+      user-select: none;
+    }
+    .tab.active {
+      color: #0066cc;
+      border-bottom-color: #0066cc;
+    }
+
     .section {
       background-color: white;
       padding: 20px;
@@ -124,8 +148,15 @@
 </head>
 <body>
 
+  <!-- تب‌ها -->
+  <div class="tabs">
+    <div class="tab active" data-target="searchSection">جستجو</div>
+    <div class="tab" data-target="manageSectionWrapper">مدیریت</div>
+    <div class="tab" data-target="addSection">افزودن</div>
+  </div>
+
   <!-- جستجو -->
-  <div class="section">
+  <div id="searchSection" class="section">
     <h2>جستجوی مانتو</h2>
     <label>فیلتر بر اساس سایز:</label>
     <div id="sizeCheckboxes">
@@ -162,8 +193,8 @@
     <div class="manto-list" id="mantoList"></div>
   </div>
 
-  <!-- مدیریت مانتوها -->
-  <div class="section">
+  <!-- مدیریت مانتوها (wrapper برای کنترل نمایش تب) -->
+  <div id="manageSectionWrapper" class="section" style="display:none;">
     <h2>مدیریت مانتوها</h2>
     <label for="manageSelect">انتخاب مانتو:</label>
     <select id="manageSelect">
@@ -178,7 +209,7 @@
   </div>
 
   <!-- افزودن مانتو -->
-  <div class="section">
+  <div id="addSection" class="section" style="display:none;">
     <h2>افزودن مانتو</h2>
     <form id="addForm">
       <label for="photo">عکس مانتو:</label>
@@ -229,145 +260,191 @@
   </div>
 
   <script>
-    const form = document.getElementById("addForm");
-    const mantoList = document.getElementById("mantoList");
-    const sizeCheckboxes = document.getElementById("sizeCheckboxes");
-    const colorFilter = document.getElementById("colorFilter");
-    const manageSelect = document.getElementById("manageSelect");
-    const manageSection = document.getElementById("manageSection");
-    const sizeControls = document.getElementById("sizeControls");
-    const managePhoto = document.getElementById("managePhoto");
-    const saveChangesBtn = document.getElementById("saveChangesBtn");
+    // کد تب‌ها
+    const tabs = document.querySelectorAll('.tab');
+    const sections = {
+      searchSection: document.getElementById('searchSection'),
+      manageSectionWrapper: document.getElementById('manageSectionWrapper'),
+      addSection: document.getElementById('addSection'),
+    };
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        // حذف کلاس اکتیو از همه تب‌ها
+        tabs.forEach(t => t.classList.remove('active'));
+        // نمایش و مخفی کردن بخش‌ها
+        Object.keys(sections).forEach(key => {
+          sections[key].style.display = (key === tab.dataset.target) ? 'block' : 'none';
+        });
+        tab.classList.add('active');
+      });
+    });
+
+    // همین کدهایی که قبلا داشتی رو اینجا اضافه کن
+    // دیتا و منطق
     let mantos = [];
 
-    form.addEventListener("submit", function(e) {
-      e.preventDefault();
-      const file = document.getElementById("photo").files[0];
-      if (!file) return alert("لطفاً یک عکس مانتو انتخاب کنید.");
+    // برای نمایش عکس مانتو در افزودن
+    const photoInput = document.getElementById('photo');
+    let photoDataUrl = '';
+
+    photoInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
       const reader = new FileReader();
-      reader.onload = function() {
-        const sizes = {};
-        ["36","37","40","42","44","46","48","50","52","54","2","4","6","8"].forEach(size => {
-          sizes[size] = parseInt(document.getElementById("size" + size).value) || 0;
-        });
-
-        const manto = {
-          photo: reader.result,
-          name: document.getElementById("name").value.trim(),
-          code: document.getElementById("code").value.trim(),
-          price: parseInt(document.getElementById("price").value),
-          color: document.getElementById("color").value,
-          sizes: sizes
-        };
-
-        if (!manto.name || !manto.code || isNaN(manto.price)) {
-          alert("لطفاً همه فیلدهای نام، کد و قیمت را پر کنید.");
-          return;
-        }
-
-        mantos.push(manto);
-        updateManageDropdown();
-        showMantos();
-        form.reset();
+      reader.onload = e => {
+        photoDataUrl = e.target.result;
       };
       reader.readAsDataURL(file);
     });
 
-    function showMantos() {
-      const selectedSizes = Array.from(sizeCheckboxes.querySelectorAll("input[type=checkbox]:checked")).map(cb => cb.value);
-      const selectedColor = colorFilter.value.trim();
-
-      if (selectedSizes.length === 0) {
-        mantoList.innerHTML = "<p>لطفاً حداقل یک سایز انتخاب کنید.</p>";
+    // افزودن مانتو
+    const addForm = document.getElementById('addForm');
+    addForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const code = document.getElementById('code').value.trim();
+      const price = parseInt(document.getElementById('price').value);
+      const color = document.getElementById('color').value;
+      if (!name || !code || !price || !photoDataUrl) {
+        alert('لطفاً همه موارد را پر کنید و عکس انتخاب کنید.');
         return;
       }
+      // موجودی سایزها
+      const sizes = ['36','37','40','42','44','46','48','50','52','54','2','4','6','8'];
+      const inventory = {};
+      sizes.forEach(sz => {
+        const val = parseInt(document.getElementById('size' + sz).value);
+        inventory[sz] = isNaN(val) ? 0 : val;
+      });
 
-      mantoList.innerHTML = "";
-      let foundAny = false;
+      // اضافه کردن به آرایه
+      mantos.push({
+        photo: photoDataUrl,
+        name, code, price, color,
+        inventory
+      });
+      alert('مانتو اضافه شد.');
+      addForm.reset();
+      photoDataUrl = '';
+      renderMantos();
+      populateManageSelect();
+    });
+
+    // نمایش لیست مانتوها در جستجو با فیلتر
+    const mantoList = document.getElementById('mantoList');
+    const colorFilter = document.getElementById('colorFilter');
+    const sizeCheckboxes = document.querySelectorAll('#sizeCheckboxes input[type="checkbox"]');
+
+    function renderMantos() {
+      const selectedSizes = Array.from(sizeCheckboxes).filter(ch => ch.checked).map(ch => ch.value);
+      const selectedColor = colorFilter.value;
+
+      mantoList.innerHTML = '';
+
       mantos.forEach((manto, idx) => {
-        if ((selectedColor === "" || manto.color === selectedColor) &&
-          selectedSizes.some(size => manto.sizes[size] > 0)) {
-          foundAny = true;
-          const div = document.createElement("div");
-          div.className = "manto-item";
-          div.innerHTML = `
-            <img src="${manto.photo}" alt="عکس مانتو" class="preview" />
-            <h3>${manto.name}</h3>
-            <p>کد: ${manto.code}</p>
-            <p>قیمت: ${manto.price.toLocaleString()} تومان</p>
-            <p>رنگ: ${manto.color}</p>
-            <div class="details" style="display:none;">
-              ${Object.entries(manto.sizes).map(([s,v]) => `سایز ${s}: ${v}`).join('<br>')}
-            </div>
-          `;
-          div.addEventListener("click", () => {
-            const details = div.querySelector(".details");
-            details.style.display = details.style.display === "none" ? "block" : "none";
-          });
-          mantoList.appendChild(div);
+        // فیلتر رنگ
+        if (selectedColor && manto.color !== selectedColor) return;
+        // فیلتر سایز - اگر هیچ سایزی انتخاب نشده باشه همه رو نمایش بده
+        if (selectedSizes.length > 0) {
+          let found = false;
+          for (const sz of selectedSizes) {
+            if ((manto.inventory[sz] ?? 0) > 0) {
+              found = true;
+              break;
+            }
+          }
+          if (!found) return;
         }
+
+        // ساخت آیتم نمایش
+        const div = document.createElement('div');
+        div.className = 'manto-item';
+        div.innerHTML = `
+          <img src="${manto.photo}" alt="${manto.name}" style="width: 100%; height: auto; border-radius: 12px; aspect-ratio: 2/3; object-fit: contain;" />
+          <h3>${manto.name} (کد: ${manto.code})</h3>
+          <div class="details">قیمت: ${manto.price.toLocaleString()} تومان</div>
+          <div class="details">رنگ: ${manto.color}</div>
+        `;
+        mantoList.appendChild(div);
       });
-      if (!foundAny) mantoList.innerHTML = "<p>هیچ مانتویی با فیلترهای انتخاب شده یافت نشد.</p>";
+
+      if (!mantoList.hasChildNodes()) {
+        mantoList.innerHTML = '<p>هیچ مانتویی با فیلترهای انتخاب شده یافت نشد.</p>';
+      }
     }
 
-    function updateManageDropdown() {
+    colorFilter.addEventListener('change', renderMantos);
+    sizeCheckboxes.forEach(ch => ch.addEventListener('change', renderMantos));
+
+    // مدیریت مانتوها
+    const manageSelect = document.getElementById('manageSelect');
+    const manageSection = document.getElementById('manageSection');
+    const managePhoto = document.getElementById('managePhoto');
+    const sizeControls = document.getElementById('sizeControls');
+    const saveChangesBtn = document.getElementById('saveChangesBtn');
+
+    function populateManageSelect() {
       manageSelect.innerHTML = '<option value="">-- انتخاب مانتو --</option>';
-      mantos.forEach((manto, idx) => {
-        const option = document.createElement("option");
-        option.value = idx;
-        option.textContent = manto.name + " (" + manto.code + ")";
-        manageSelect.appendChild(option);
+      mantos.forEach((m, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = `${m.name} (${m.code})`;
+        manageSelect.appendChild(opt);
       });
     }
 
-    manageSelect.addEventListener("change", function() {
-      const idx = this.value;
-      if (idx === "") {
-        manageSection.style.display = "none";
+    let currentManageIndex = null;
+
+    manageSelect.addEventListener('change', () => {
+      const idx = manageSelect.value;
+      if (idx === '') {
+        manageSection.style.display = 'none';
+        currentManageIndex = null;
         return;
       }
-      manageSection.style.display = "block";
-      const manto = mantos[idx];
-      managePhoto.src = manto.photo;
-      sizeControls.innerHTML = "";
-
-      Object.entries(manto.sizes).forEach(([size, count]) => {
-        const div = document.createElement("div");
+      currentManageIndex = parseInt(idx);
+      const m = mantos[currentManageIndex];
+      managePhoto.src = m.photo;
+      sizeControls.innerHTML = '';
+      Object.entries(m.inventory).forEach(([sz, val]) => {
+        const div = document.createElement('div');
         div.innerHTML = `
-          سایز ${size}: <span id="count-${size}">${count}</span>
-          <button type="button" data-size="${size}" class="dec-btn">-</button>
-          <button type="button" data-size="${size}" class="inc-btn">+</button>
+          <span>سایز ${sz}: ${val}</span>
+          <button data-size="${sz}" data-action="decrease">-</button>
+          <button data-size="${sz}" data-action="increase">+</button>
         `;
         sizeControls.appendChild(div);
       });
-
-      sizeControls.querySelectorAll(".dec-btn").forEach(btn => {
-        btn.onclick = () => {
-          const s = btn.getAttribute("data-size");
-          if (manto.sizes[s] > 0) {
-            manto.sizes[s]--;
-            sizeControls.querySelector(`#count-${s}`).textContent = manto.sizes[s];
-          }
-        };
-      });
-
-      sizeControls.querySelectorAll(".inc-btn").forEach(btn => {
-        btn.onclick = () => {
-          const s = btn.getAttribute("data-size");
-          manto.sizes[s]++;
-          sizeControls.querySelector(`#count-${s}`).textContent = manto.sizes[s];
-        };
-      });
+      manageSection.style.display = 'block';
     });
 
-    saveChangesBtn.addEventListener("click", () => {
-      alert("تغییرات ثبت شد.");
-      showMantos();
+    sizeControls.addEventListener('click', e => {
+      if (e.target.tagName !== 'BUTTON') return;
+      if (currentManageIndex === null) return;
+      const btn = e.target;
+      const size = btn.getAttribute('data-size');
+      const action = btn.getAttribute('data-action');
+      if (!size || !action) return;
+
+      const inv = mantos[currentManageIndex].inventory;
+      if (action === 'increase') {
+        inv[size]++;
+      } else if (action === 'decrease') {
+        if (inv[size] > 0) inv[size]--;
+      }
+      // به‌روزرسانی نمایش
+      manageSelect.dispatchEvent(new Event('change'));
     });
 
-    sizeCheckboxes.addEventListener("change", showMantos);
-    colorFilter.addEventListener("change", showMantos);
+    saveChangesBtn.addEventListener('click', () => {
+      alert('تغییرات ثبت شد.');
+      renderMantos();
+    });
+
+    // نمایش اولیه
+    renderMantos();
+    populateManageSelect();
   </script>
-
 </body>
 </html>
